@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Генератор промокодов Standoff 2 (симулятор)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1e1e1e;
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  #generateBtn {
+    background: #4CAF50;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-bottom: 20px;
+  }
+
+  #generateBtn:hover { background: #45a049; }
+  #generateBtn:active { transform: scale(0.97); }
+
+  #output {
+    width: 100%;
+    max-width: 500px;
+    background: #2d2d2d;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    max-height: 60vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .entry {
+    border-bottom: 1px dashed #444;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .code { color: #4CAF50; font-weight: bold; }
+  .skin { color: #FFD700; }
+  .rarity { color: #FF6EC7; }
+  .activation { color: #888; font-size: 12px; }
+
+  .rarity-Common    { color: #b0b0b0; }
+  .rarity-Uncommon  { color: #4169e1; }
+  .rarity-Rare      { color: #00bfff; }
+  .rarity-Epic      { color: #8a2be2; }
+  .rarity-Legendary { color: #ff8c00; }
+  .rarity-Arcane    { color: #9932cc; }
+  .rarity-Nameless  { color: #ff0000; }
+
+  .footer {
+    margin-top: 20px;
+    color: #888;
+    font-size: 12px;
+    text-align: center;
+    max-width: 500px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<h1>🎮 Генератор промокодов Standoff 2</h1>
+<button id="generateBtn">Сгенерировать промокод</button>
+<div id="output"></div>
+<div class="footer">
+  Это симулятор. Настоящие промокоды создаёт только Axelbolt.
+</div>
+
+<script>
+  // Скины по редкости
+  const skins = {
+    Common:    ["Muncer SM1014", "P250 Storm", "Glock-18 Sand", "M4A1 Urban", "Tec-9 Ash"],
+    Uncommon:  ["AKR12 Jungle", "F/S Desert", "MP5 Glacier", "Berettas Cowboy", "UMP-45 Forest"],
+    Rare:      ["P350 Silver Wing", "Berettas Cascade", "MP5 Clouds", "FN FAL Splash", "Tec-9 Iris", "M4A1 Hazard"],
+    Epic:      ["USP Genesis", "M16 Challenger", "UMP-45 Smelter", "USP Celestial Tiger", "FabM Undertow"],
+    Legendary: ["F/S Vines", "Akimbo Uzi Yokai", "Tec-9 Blossom", "Mallard Ascend", "AKR Redline"],
+    Arcane:    ["AWM Ravage", "Butterfly Gambit", "MP7 R1NA", "AKR Orchid", "AWM Moonstone"],
+    Nameless:  ["Karambit Gold", "M9 Bayonet Moonstone", "Kunai Diffusion", "AWM Dragon Lore"],
+    Knife:     ["Tanto Celestial Tiger", "Kukri Cascade", "M9 Bayonet Moonstone", "Mantis Yokai", "Stiletto Ascend", "Kunai Diffusion"]
+  };
+
+  const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const usedCodes = new Set();
+  let totalGenerated = 0;
+
+  function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function generateCode(length = 12) {
+    while (true) {
+      let code = "";
+      for (let i = 0; i < length; i++) {
+        code += CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+      if (!usedCodes.has(code)) {
+        usedCodes.add(code);
+        return code;
+      }
+    }
+  }
+
+  function pickSkin() {
+    totalGenerated++;
+    const roll = totalGenerated;
+
+    // Нож — раз в 500
+    if (roll % 500 === 0) {
+      return { skin: randomChoice(skins.Knife), rarity: "Nameless" };
+    }
+
+    // Arcane / Nameless — раз в 150
+    if (roll % 150 === 0) {
+      if (Math.random() < 0.5) {
+        return { skin: randomChoice(skins.Arcane), rarity: "Arcane" };
+      }
+      return { skin: randomChoice(skins.Nameless), rarity: "Nameless" };
+    }
+
+    // Epic / Legendary — раз в 50
+    if (roll % 50 === 0) {
+      if (Math.random() < 0.6) {
+        return { skin: randomChoice(skins.Epic), rarity: "Epic" };
+      }
+      return { skin: randomChoice(skins.Legendary), rarity: "Legendary" };
+    }
+
+    // Обычный дроп по весам
+    const weights = [
+      { name: "Common",    weight: 45 },
+      { name: "Uncommon",  weight: 30 },
+      { name: "Rare",      weight: 20 },
+      { name: "Epic",      weight: 4  },
+      { name: "Legendary", weight: 1  }
+    ];
+
+    const total = weights.reduce((s, w) => s + w.weight, 0);
+    let r = Math.floor(Math.random() * total) + 1;
+    let cumulative = 0;
+
+    for (const w of weights) {
+      cumulative += w.weight;
+      if (r <= cumulative) {
+        return { skin: randomChoice(skins[w.name]), rarity: w.name };
+      }
+    }
+
+    return { skin: randomChoice(skins.Common), rarity: "Common" };
+  }
+
+  function onGenerate() {
+    const code = generateCode(12);
+    const { skin, rarity } = pickSkin();
+
+    const entry = document.createElement("div");
+    entry.className = "entry";
+    entry.innerHTML =
+      `🎟️ Промокод: <span class="code">${code}</span><br>` +
+      `🎨 Скин: <span class="skin">${skin}</span><br>` +
+      `⭐ Редкость: <span class="rarity rarity-${rarity}">${rarity}</span><br>` +
+      `<span class="activation">⚠️ Активаций: 1</span>`;
+
+    const output = document.getElementById("output");
+    output.prepend(entry);
+
+    // Ограничиваем историю до 50 записей
+    while (output.children.length > 50) {
+      output.removeChild(output.lastChild);
+    }
+  }
+
+  document.getElementById("generateBtn").addEventListener("click", onGenerate);
+</script>
+
+</body>
+  </html>
