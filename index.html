@@ -19,6 +19,11 @@
     --danger: #ff4d6d;
   }
 
+  html, body {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
   body {
     font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg);
@@ -32,6 +37,20 @@
     align-items: center;
     padding: 32px 16px;
   }
+
+  button, input {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+
+  button:focus, input:focus { outline: none; }
+
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  button::-moz-focus-inner { border: 0; }
 
   .container {
     width: 100%;
@@ -78,7 +97,7 @@
     margin-top: 2px;
   }
 
-  /* ── Gate (экран входа) ── */
+  /* ── Gate ── */
   .gate {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -102,30 +121,59 @@
     line-height: 1.5;
   }
 
-  .gate input {
+  .input-wrap {
+    position: relative;
     width: 100%;
-    padding: 14px 16px;
+  }
+
+  .input-wrap input {
+    width: 100%;
+    padding: 14px 48px 14px 16px;
     border-radius: 12px;
     border: 1px solid var(--border);
     background: var(--bg-card-2);
     color: var(--text);
     font-size: 14px;
     font-family: inherit;
-    outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
 
-  .gate input:focus {
+  .input-wrap input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(124,92,255,0.2);
   }
 
-  .gate input.error {
+  .input-wrap input.error {
     border-color: var(--danger);
     box-shadow: 0 0 0 3px rgba(255,77,109,0.2);
   }
 
-  .gate button {
+  .toggle-eye {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .toggle-eye:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .toggle-eye svg { width: 18px; height: 18px; }
+
+  .gate button.login {
     width: 100%;
     padding: 14px 24px;
     border: none;
@@ -136,14 +184,18 @@
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    transition: transform 0.15s, filter 0.2s;
+    transition: transform 0.15s, filter 0.2s, box-shadow 0.2s;
     box-shadow: 0 6px 24px rgba(124,92,255,0.35);
   }
 
-  .gate button:hover { filter: brightness(1.1); }
-  .gate button:active { transform: scale(0.98); }
+  .gate button.login:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 8px 32px rgba(124,92,255,0.5);
+  }
 
-  .gate .error-msg {
+  .gate button.login:active { transform: scale(0.98); }
+
+  .error-msg {
     font-size: 12.5px;
     color: var(--danger);
     display: none;
@@ -151,11 +203,10 @@
     gap: 6px;
   }
 
-  .gate .error-msg.show { display: flex; }
+  .error-msg.show { display: flex; }
+  .error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-  .gate .error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
-
-  /* ── Генератор (скрыт до входа) ── */
+  /* ── Generator ── */
   .generator {
     display: none;
     flex-direction: column;
@@ -319,11 +370,20 @@
     <h1>Генератор промокодов<span>Standoff 2</span></h1>
   </header>
 
-  <!-- Экран входа -->
   <div class="gate" id="gate">
     <h2>Официальный сайт генерации промокодов</h2>
     <p>Введите свой ключ доступа, чтобы продолжить.</p>
-    <input type="password" id="keyInput" placeholder="Ключ доступа" autocomplete="off">
+
+    <div class="input-wrap">
+      <input type="password" id="keyInput" placeholder="Ключ доступа" autocomplete="off">
+      <button class="toggle-eye" id="toggleEye" type="button" aria-label="Показать ключ">
+        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+
     <div class="error-msg" id="errorMsg">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
@@ -331,10 +391,9 @@
       </svg>
       Неверный ключ доступа
     </div>
-    <button id="loginBtn">Войти</button>
+    <button class="login" id="loginBtn">Войти</button>
   </div>
 
-  <!-- Генератор -->
   <div class="generator" id="generator">
     <button class="gen-btn" id="genBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -456,6 +515,9 @@ const icons = {
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
 };
 
+const eyeOpen = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+const eyeClosed = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
 function randomChoice(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -570,6 +632,19 @@ function tryLogin() {
   }
 }
 
+function togglePassword() {
+  const input = document.getElementById("keyInput");
+  const icon = document.getElementById("eyeIcon");
+  if (input.type === "password") {
+    input.type = "text";
+    icon.innerHTML = eyeClosed;
+  } else {
+    input.type = "password";
+    icon.innerHTML = eyeOpen;
+  }
+}
+
+document.getElementById("toggleEye").addEventListener("click", togglePassword);
 document.getElementById("loginBtn").addEventListener("click", tryLogin);
 document.getElementById("keyInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") tryLogin();
