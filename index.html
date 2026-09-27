@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Генератор промокодов Standoff 2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0d0d12;
+    --bg-card: #16161f;
+    --bg-card-2: #1d1d29;
+    --border: #2a2a3a;
+    --text: #e8e8f0;
+    --text-dim: #8a8aa0;
+    --accent: #7c5cff;
+    --accent-2: #4dd4ff;
+    --danger: #ff4d6d;
+    --green: #2ecc71;
+    --gold: #ffd166;
+  }
+
+  html, body {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  body {
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(124,92,255,0.15), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(77,212,255,0.12), transparent 40%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+
+  button, input {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    font-family: inherit;
+  }
+
+  button:focus, input:focus { outline: none; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button::-moz-focus-inner { border: 0; }
+
+  .container {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 0;
+  }
+
+  .logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(124,92,255,0.4);
+  }
+
+  .logo svg { width: 24px; height: 24px; }
+
+  h1 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  h1 span {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-dim);
+    letter-spacing: 0;
+    margin-top: 2px;
+  }
+
+  /* ── Gate ── */
+  .gate {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .gate h2 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  .gate p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .input-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  .input-wrap input {
+    width: 100%;
+    padding: 14px 48px 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-card-2);
+    color: var(--text);
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,92,255,0.2);
+  }
+
+  .input-wrap input.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(255,77,109,0.2);
+  }
+
+  .toggle-eye {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .toggle-eye:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .toggle-eye svg { width: 18px; height: 18px; }
+
+  .login {
+    width: 100%;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #5a3fd4);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, filter 0.2s, box-shadow 0.2s;
+    box-shadow: 0 6px 24px rgba(124,92,255,0.35);
+  }
+
+  .login:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 8px 32px rgba(124,92,255,0.5);
+  }
+
+  .login:active { transform: scale(0.98); }
+
+  .error-msg {
+    font-size: 12.5px;
+    color: var(--danger);
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .error-msg.show { display: flex; }
+  .error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* ── App ── */
+  .app {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .app.active { display: flex; }
+
+  .view { display: none; flex-direction: column; gap: 16px; }
+  .view.active { display: flex; }
+
+  /* ── Main menu ── */
+  .menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .menu-item {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    text-align: left;
+    color: var(--text);
+  }
+
+  .menu-item:hover {
+    border-color: var(--accent);
+    background: rgba(124,92,255,0.06);
+  }
+
+  .menu-item:active { transform: scale(0.99); }
+
+  .menu-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .menu-icon.purple { background: linear-gradient(135deg, var(--accent), #5a3fd4); }
+  .menu-icon.blue   { background: linear-gradient(135deg, #4dd4ff, #2b8fd6); }
+
+  .menu-icon svg { width: 22px; height: 22px; }
+
+  .menu-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+
+  .menu-title { font-size: 14.5px; font-weight: 700; }
+
+  .menu-sub { font-size: 12px; color: var(--text-dim); }
+
+  .menu-arrow {
+    width: 20px;
+    height: 20px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* ── Back button ── */
+  .back-btn {
+    align-self: flex-start;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .back-btn:hover {
+    border-color: var(--accent);
+    background: rgba(124,92,255,0.06);
+  }
+
+  .back-btn svg { width: 14px; height: 14px; }
+
+  /* ── Generator ── */
+  .gen-btn {
+    width: 100%;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), #5a3fd4);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.15s, box-shadow 0.2s, filter 0.2s, opacity 0.2s;
+    box-shadow: 0 6px 24px rgba(124,92,255,0.35);
+  }
+
+  .gen-btn:hover:not(:disabled) {
+    filter: brightness(1.1);
+    box-shadow: 0 8px 32px rgba(124,92,255,0.5);
+  }
+
+  .gen-btn:active:not(:disabled) { transform: scale(0.98); }
+
+  .gen-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.3);
+  }
+
+  .gen-btn svg { width: 18px; height: 18px; }
+  .gen-btn svg.spin { animation: spin 1s linear infinite; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .output {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.4s, border-color 0.4s;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--rarity-color, var(--accent));
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card.glow {
+    box-shadow: 0 6px 24px var(--rarity-color);
+    border-color: var(--rarity-color);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+  }
+
+  .row + .row { border-top: 1px solid rgba(255,255,255,0.04); }
+
+  .row .row-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .row .row-icon svg { width: 100%; height: 100%; }
+
+  .row .label {
+    font-size: 12px;
+    color: var(--text-dim);
+    min-width: 78px;
+    flex-shrink: 0;
+  }
+
+  .row .value {
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .code-row { align-items: center; }
+
+  .code-value {
+    font-family: 'SF Mono', 'Consolas', monospace;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    color: var(--accent-2);
+    text-shadow: 0 0 16px rgba(77,212,255,0.4);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .code-char {
+    display: inline-block;
+    width: 1.05ch;
+    text-align: center;
+    transition: color 0.1s;
+  }
+
+  .code-char.spinning { color: var(--text-dim); opacity: 0.5; }
+  .code-char.locked { color: var(--accent-2); animation: pop 0.25s ease; }
+
+  @keyframes pop {
+    0%   { transform: scale(1.4); color: #fff; }
+    100% { transform: scale(1);   color: var(--accent-2); }
+  }
+
+  .action-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card-2);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+
+  .action-btn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: rgba(124,92,255,0.1);
+  }
+
+  .action-btn.copied {
+    color: var(--green);
+    border-color: var(--green);
+    background: rgba(46,204,113,0.1);
+  }
+
+  .action-btn svg { width: 16px; height: 16px; }
+
+  .rarity-value { color: var(--rarity-color, #fff); }
+
+  .weapon-icon { color: var(--accent-2); opacity: 0.9 !important; }
+  .weapon-icon svg { width: 20px !important; height: 20px !important; }
+
+  /* ── Top-up ── */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title svg { width: 16px; height: 16px; color: var(--accent-2); }
+
+  .panel-label {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: -8px;
+  }
+
+  .id-input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-card-2);
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    letter-spacing: 1.5px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .id-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,92,255,0.2);
+  }
+
+  .id-input.error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(255,77,109,0.2);
+  }
+
+  .id-hint {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-top: -6px;
+  }
+
+  .amounts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .amount-btn {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card-2);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .amount-btn:hover {
+    border-color: var(--accent);
+    background: rgba(124,92,255,0.08);
+  }
+
+  .amount-btn:active { transform: scale(0.97); }
+
+  .amount-btn svg { width: 14px; height: 14px; opacity: 0.7; }
+
+  .amount-btn.selected {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(124,92,255,0.2), rgba(77,212,255,0.15));
+    color: #fff;
+  }
+
+  .amount-btn.selected svg { opacity: 1; }
+
+  .total-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-card-2);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+
+  .total-label {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .total-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  .cart-btn {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #5a3fd4);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.15s, filter 0.2s, box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 6px 20px rgba(124,92,255,0.3);
+  }
+
+  .cart-btn:hover:not(:disabled) { filter: brightness(1.1); }
+  .cart-btn:active:not(:disabled) { transform: scale(0.98); }
+
+  .cart-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+    box-shadow: none;
+  }
+
+  .cart-btn svg { width: 16px; height: 16px; }
+
+  /* ── Cart / receipt ── */
+  .receipt {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .receipt-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.08);
+  }
+
+  .receipt-row:last-child { border-bottom: none; }
+  .receipt-row .k { color: var(--text-dim); }
+  .receipt-row .v { font-weight: 700; }
+  .receipt-row .v.gold { color: var(--gold); }
+
+  .success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 16px;
+    text-align: center;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(46,204,113,0.15);
+    border: 2px solid var(--green);
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .success-icon svg { width: 32px; height: 32px; }
+
+  @keyframes scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .success h3 { font-size: 17px; font-weight: 800; }
+  .success p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── Rules ── */
+  .rules {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+
+  .rules-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .rules-title svg { width: 15px; height: 15px; opacity: 0.8; }
+  .rules ul { list-style: none; }
+
+  .rules li {
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .rules li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: #55556a;
+    padding: 4px 0 8px;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--bg-card);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+    max-width: 90vw;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  @media (max-width: 420px) {
+    .code-value { font-size: 12.5px; letter-spacing: 0.3px; }
+    .row .label { min-width: 66px; font-size: 11.5px; }
+    .row .value { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
+        <circle cx="9" cy="12" r="2"/>
+      </svg>
+    </div>
+    <h1>Генератор промокодов<span>Standoff 2</span></h1>
+  </header>
+
+  <!-- Экран входа -->
+  <div class="gate" id="gate">
+    <h2>Официальный сайт генерации промокодов</h2>
+    <p>Введите свой ключ доступа, чтобы продолжить.</p>
+
+    <div class="input-wrap">
+      <input type="password" id="keyInput" placeholder="Ключ доступа" autocomplete="off">
+      <button class="toggle-eye" id="toggleEye" type="button" aria-label="Показать ключ">
+        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="error-msg" id="errorMsg">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+      Неверный ключ доступа
+    </div>
+    <button class="login" id="loginBtn">Войти</button>
+  </div>
+
+  <!-- Приложение -->
+  <div class="app" id="app">
+
+    <!-- Меню -->
+    <div class="view active" id="viewMenu">
+      <div class="menu">
+        <button class="menu-item" id="goGenerator">
+          <div class="menu-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
+              <circle cx="9" cy="12" r="2"/>
+            </svg>
+          </div>
+          <div class="menu-info">
+            <span class="menu-title">Сгенерировать промокод</span>
+            <span class="menu-sub">Случайный код на скин из игры</span>
+          </div>
+          <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+
+        <button class="menu-item" id="goTopup">
+          <div class="menu-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2"/>
+              <path d="M2 10h20"/>
+              <circle cx="17" cy="14" r="1"/>
+            </svg>
+          </div>
+          <div class="menu-info">
+            <span class="menu-title">Пополнить баланс</span>
+            <span class="menu-sub">Пополнение G на аккаунт по ID</span>
+          </div>
+          <svg class="menu-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Генератор -->
+    <div class="view" id="viewGenerator">
+      <button class="back-btn" data-back>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        Назад
+      </button>
+
+      <button class="gen-btn" id="genBtn">
+        <svg id="genIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          <path d="M21 3v6h-6"/>
+        </svg>
+        <span id="genLabel">Сгенерировать промокод</span>
+      </button>
+
+      <div class="output" id="output"></div>
+
+      <div class="rules">
+        <div class="rules-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+          </svg>
+          Правила генерации
+        </div>
+        <ul>
+          <li>Стартрек-версии скинов не генерируются.</li>
+          <li>В базе представлены не все существующие скины игры.</li>
+          <li>Каждый промокод уникален и рассчитан на 1 активацию.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Пополнение -->
+    <div class="view" id="viewTopup">
+      <button class="back-btn" data-back>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        Назад
+      </button>
+
+      <div class="panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Данные аккаунта
+        </div>
+        <span class="panel-label">ID аккаунта</span>
+        <input type="text" class="id-input" id="idInput" placeholder="00000000" maxlength="8" inputmode="numeric" value="67250184">
+        <span class="id-hint">8 цифр из профиля Standoff 2</span>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Сумма пополнения
+        </div>
+
+        <div class="amounts" id="amounts">
+          <button class="amount-btn" data-amount="100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            100 G
+          </button>
+          <button class="amount-btn" data-amount="500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            500 G
+          </button>
+          <button class="amount-btn" data-amount="1000">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            1000 G
+          </button>
+          <button class="amount-btn" data-amount="3000">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            3000 G
+          </button>
+        </div>
+
+        <div class="total-row">
+          <span class="total-label">Итого на аккаунт</span>
+          <span class="total-value" id="totalValue">0 G</span>
+        </div>
+
+        <button class="cart-btn" id="cartBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          Перейти в корзину
+        </button>
+      </div>
+    </div>
+
+    <!-- Корзина -->
+    <div class="view" id="viewCart">
+      <button class="back-btn" data-back>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        Назад
+      </button>
+
+      <div class="panel">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          Корзина
+        </div>
+
+        <div class="receipt">
+          <div class="receipt-row">
+            <span class="k">ID аккаунта</span>
+            <span class="v" id="cartId">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="k">Сумма пополнения</span>
+            <span class="v" id="cartSum">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="k">К зачислению</span>
+            <span class="v gold" id="cartTotal">—</span>
+          </div>
+        </div>
+
+        <button class="cart-btn" id="payBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="6" width="20" height="12" rx="2"/>
+            <path d="M2 10h20"/>
+          </svg>
+          Оплатить
+        </button>
+      </div>
+    </div>
+
+    <!-- Успех -->
+    <div class="view" id="viewSuccess">
+      <div class="panel">
+        <div class="success">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+          </div>
+          <h3>Пополнение успешно</h3>
+          <p id="successText">Средства зачислены на аккаунт</p>
+        </div>
+
+        <div class="receipt">
+          <div class="receipt-row">
+            <span class="k">ID аккаунта</span>
+            <span class="v" id="successId">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="k">Зачислено</span>
+            <span class="v gold" id="successSum">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="k">Дата</span>
+            <span class="v" id="successDate">—</span>
+          </div>
+        </div>
+
+        <button class="cart-btn" id="topupAgainBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Пополнить ещё
+        </button>
+      </div>
+    </div>
+
+    <div class="footer">© Standoff 2 Promo Generator</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 6L9 17l-5-5"/>
+  </svg>
+  <span id="toastText">Скопировано</span>
+</div>
+
+<script>
+const ACCESS_KEY = "PromoGenSo2Offic-1238";
+const COOLDOWN_MS = 5000;
+
+/* ── Скины ── */
+const skins = {
+  Common: [
+    "G22 Scale", "AKR12 Roar", "M40 Cursed Fire", "FabM Cursed Fire",
+    "MP7 Thorn", "P90 Jungle", "FN FAL Acid Carbon", "SM 1014 Blaster",
+    "Akimbo Uzi Desert Camo", "M4A1 Contour", "M60 Shale", "Mallard Frontline",
+    "F/S Zap", "Desert Eagle Glory", "SM1014 Bolt", "M60 Turret"
+  ],
+  Uncommon: [
+    "UMP45 Peaceful Dream", "AKR Scale", "AWM Elevation", "SM1014 Tropic",
+    "USP Fiend", "Tec-9 Aurora", "UMP45 Pixel V2", "AKR Worm",
+    "MP7 Frequency", "P90 Exit Strategy", "VAL Krait", "AKR12 Cold Core",
+    "MP7 Dawn", "MP5 Dusk", "M110 Pursuit", "FAMAS Gunsmoke"
+  ],
+  Rare: [
+    "P350 Oni", "TEC-9 Tropic", "M4A1 Kitsune", "M4 Demon",
+    "G22 Starfall", "Desert Eagle Ace", "F/S Tactical", "M110 Cyber",
+    "P350 Silver Wing", "Berettas Cascade", "MP5 Clouds", "Mallard Falling Leaves",
+    "M16 Needle", "M40 Grip", "TEC-9 Needle", "USP Purple Camo",
+    "M4A1 Kitsune", "UMP 45 Professional", "FAMAS Protocol", "M4 Catalyst",
+    "SPAS Hammer", "G22 Relic", "FN FAL Leather", "MAC10 Ruby Shadow",
+    "SPAS Waypoint", "Mallard Polar Bear", "AKR Arctic Camo", "Akimbo Uzi No Escape",
+    "M16 Cutting Edge", "SM 1014 Cyberline", "FN FAL Firewall", "MAC 10 Thermal",
+    "P90 Unstoppable", "M4 Kachi", "M40 Daybreak", "SM1014 Triton"
+  ],
+  Epic: [
+    "MP7 Palace", "FAMAS Anger", "M60 Steam Beast",
+    "USP Pisces", "UMP45 Cerberus", "FN FAL Tactical",
+    "USP Celestial Tiger", "FabM Undertow", "M4A1 Tempest",
+    "G22 Adam", "USP Warden", "SM 1014 Signal Loss",
+    "UMP45 Spirit", "MP7 Revival", "FAMAS Autumn",
+    "FABM Flight", "UMP45 Geometric", "P350 Autumn", "M110 Transition",
+    "USP Genesis", "Val Iron Wolf", "P350 Lab Prototype", "Mac 10 Escape Plan",
+    "P90 Data flow", "FAMAS Spline", "Tec-9 Neo Core", "UMP 45 Combat Gear",
+    "Tec-9 Night Slayer", "F/S Pink Shot", "MP5 Water Gun", "FN FAL Dusk Tide",
+    "Desert Eagle Piranha", "M4A1 Sour", "AKR12 Steam Beast"
+  ],
+  Legendary: [
+    "USP Chameleon", "Desert Eagle Orochi", "M60 Grunge",
+    "Tec-9 Fable", "MP7 Lich", "M4 Lizard",
+    "Akimbo Uzi Yokai", "Tec-9 Blossom", "Mallard Ascend",
+    "Berettas Marco", "MP5 Phantom Form", "M4A1 Renegade",
+    "M4 Revival", "F/S Rush", "AKR12 Geometric",
+    "AWM Sport V2", "UMP 45 Deep Cover", "Desert Eagle Razorwire", "M110 Top Secret",
+    "MP7 Future Tech", "G22 Wildstyle", "FabM Wildstyle",
+    "M40 Northern Lights", "VAL Solstice", "P350 Tag King", "G22 Casual", "P90 Oops"
+  ],
+  Arcane: [
+    "M4A1 Bubblegum", "AWM BOOM",
+    "F/S Venom", "M4 Samurai", "Butterfly Legacy", "Butterfly Dragon Glass",
+    "Butterfly Black Widow", "Butterfly Starfall",
+    "MP7 R1NA", "AKR Orchid", "AWM Moonstone",
+    "AKR Twilight", "AWM Venom",
+    "FNFAL Phoenix Risen", "USP Geometric",
+    "M4 Dire Wolf", "USP Top Secret", "AKR 12 Speedrun",
+    "M4 Wildstyle", "AWM System Breach",
+    "AKR 12 Hanami", "Tanto Hanami", "Scorpion Neko Joy", "Stiletto Voidroot",
+    "M9 Bayonet Amber Koi", "Fang Wavesong", "Kunai Wavesong",
+    "M16 Sea Glint", "AKR Tag King", "FabM Boom"
+  ],
+  Nameless: [
+    "AWM Treasure Hunter", "Desert Eagle Aureate",
+    "Karambit Gold", "Dual Daggers Harmony", "Sting Mimicry",
+    "Butterfly Twilight"
+  ]
+};
+
+const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const usedCodes = new Set();
+let totalGenerated = 0;
+let isRolling = false;
+let cooldownTimer = null;
+
+const rarityColors = {
+  Common:    "#b0b0b0",
+  Uncommon:  "#4169e1",
+  Rare:      "#00bfff",
+  Epic:      "#8a2be2",
+  Legendary: "#ff8c00",
+  Arcane:    "#c77dff",
+  Nameless:  "#ff3b3b"
+};
+
+const icons = {
+  ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .9-5 4.8 1.2 7L12 18l-6.2 3.2L7 14.2 2 9.4l7-.9z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  pistol: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8v4h4l1 2h5l1-2h3l2 2h3v-3h-2l-1-2h-6l-1-1H3zm4 6h5v3H7v-3z"/></svg>',
+  rifle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 10h3V8h8v2h3l2 2h3v2h-2l-1 2h-3l-1-2H9v3H5v-3H2v-2zm16-1h2v3h-2z"/></svg>',
+  sniper: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 11h2v2H2v-2zm3-1h9v3H5v-3zm9 1h4v-2h3v4h-3v-2h-4v-3zM6 7h2v2H6V7zm5 10h4v2h-4v-2z"/></svg>',
+  smg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 10h9v3H8v2H3v-5zm9 0h4l2 2v1h-2l-1 3h-3v-3h-1v-3zm7-1h2v3h-2V9z"/></svg>',
+  shotgun: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 11h14v3H2v-3zm14-1h5v5h-3l-1-2h-1V10zM4 15h4v2H4v-2z"/></svg>',
+  knife: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3l7 7-3 3-2-2-6 6-2-2 6-6-2-2 2-4zm-7 14l2 2-3 3-2-2 3-3z"/></svg>'
+};
+
+const eyeOpen = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+const eyeClosed = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
+/* ── Утилиты ── */
+function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function randomChar() { return CHARS[Math.floor(Math.random() * CHARS.length)]; }
+
+function getWeaponIcon(skin) {
+  const s = skin.toLowerCase();
+  if (/(karambit|butterfly|bayonet|kunai|stiletto|tanto|kukri|fang|scorpion|daggers|sting|mantis|knife)/.test(s)) return icons.knife;
+  if (/(awm|m40|m110|sniper)/.test(s)) return icons.sniper;
+  if (/(spas|shotgun)/.test(s)) return icons.shotgun;
+  if (/(mp5|mp7|p90|uzi|ump|mac)/.test(s)) return icons.smg;
+  if (/(akr|m4|m16|fn fal|famas|val|g22|m60)/.test(s)) return icons.rifle;
+  return icons.pistol;
+}
+
+function generateCode(length = 12) {
+  while (true) {
+    let code = "";
+    for (let i = 0; i < length; i++) code += randomChar();
+    if (!usedCodes.has(code)) { usedCodes.add(code); return code; }
+  }
+}
+
+function pickSkin() {
+  totalGenerated++;
+  const roll = totalGenerated;
+
+  if (roll % 500 === 0) return { skin: randomChoice(skins.Nameless), rarity: "Nameless" };
+  if (roll % 150 === 0) return { skin: randomChoice(skins.Arcane), rarity: "Arcane" };
+  if (roll % 50 === 0) {
+    if (Math.random() < 0.6) return { skin: randomChoice(skins.Epic), rarity: "Epic" };
+    return { skin: randomChoice(skins.Legendary), rarity: "Legendary" };
+  }
+
+  const weights = [
+    { name: "Common",    weight: 45 },
+    { name: "Uncommon",  weight: 30 },
+    { name: "Rare",      weight: 20 },
+    { name: "Epic",      weight: 4  },
+    { name: "Legendary", weight: 1  }
+  ];
+
+  const total = weights.reduce((s, w) => s + w.weight, 0);
+  const r = Math.floor(Math.random() * total) + 1;
+  let cumulative = 0;
+  for (const w of weights) {
+    cumulative += w.weight;
+    if (r <= cumulative) return { skin: randomChoice(skins[w.name]), rarity: w.name };
+  }
+  return { skin: randomChoice(skins.Common), rarity: "Common" };
+}
+
+function showToast(text, isError = false) {
+  const toast = document.getElementById("toast");
+  const toastText = document.getElementById("toastText");
+  toastText.textContent = text;
+  toast.style.borderColor = isError ? "var(--danger)" : "var(--green)";
+  toast.style.color = isError ? "var(--danger)" : "var(--green)";
+  toast.classList.add("show");
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+async function rollCodeAnimation(codeChars, charElements) {
+  const REEL_DURATION = 1000;
+  const STAGGER = 80;
+  const startTime = performance.now();
+
+  const animations = charElements.map((el, index) => {
+    return new Promise(resolve => {
+      el.classList.add("spinning");
+      const stopAt = startTime + REEL_DURATION + index * STAGGER;
+
+      function tick() {
+        const now = performance.now();
+        if (now >= stopAt) {
+          el.textContent = codeChars[index];
+          el.classList.remove("spinning");
+          el.classList.add("locked");
+          resolve();
+          return;
+        }
+        const remaining = stopAt - now;
+        const interval = Math.max(30, remaining / 12);
+        el.textContent = randomChar();
+        setTimeout(tick, interval);
+      }
+      setTimeout(tick, index * STAGGER);
+    });
+  });
+
+  await Promise.all(animations);
+}
+
+/* ── Навигация ── */
+function showView(id) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+document.querySelectorAll("[data-back]").forEach(btn => {
+  btn.addEventListener("click", () => showView("viewMenu"));
+});
+
+document.getElementById("goGenerator").addEventListener("click", () => showView("viewGenerator"));
+document.getElementById("goTopup").addEventListener("click", () => {
+  showView("viewTopup");
+  resetTopup();
+});
+
+/* ── Генератор ── */
+async function onGenerate() {
+  if (isRolling) return;
+
+  const output = document.getElementById("output");
+  const genBtn = document.getElementById("genBtn");
+  const genIcon = document.getElementById("genIcon");
+  const genLabel = document.getElementById("genLabel");
+
+  isRolling = true;
+  genBtn.disabled = true;
+  genIcon.classList.add("spin");
+  genLabel.textContent = "Генерация...";
+
+  output.innerHTML = "";
+
+  const code = generateCode(12);
+  const { skin, rarity } = pickSkin();
+  const color = rarityColors[rarity] || "#fff";
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.style.setProperty("--rarity-color", color);
+
+  card.innerHTML = `
+    <div class="row code-row">
+      <span class="row-icon" style="color:${color}">${icons.ticket}</span>
+      <span class="label">Промокод</span>
+      <span class="value code-value" id="codeValue"></span>
+      <button class="action-btn" id="copyBtn" title="Скопировать">${icons.copy}</button>
+    </div>
+    <div class="row">
+      <span class="row-icon weapon-icon">${getWeaponIcon(skin)}</span>
+      <span class="label">Скин</span>
+      <span class="value">${skin}</span>
+    </div>
+    <div class="row">
+      <span class="row-icon">${icons.star}</span>
+      <span class="label">Редкость</span>
+      <span class="value rarity-value">${rarity}</span>
+    </div>
+    <div class="row">
+      <span class="row-icon">${icons.check}</span>
+      <span class="label">Активаций</span>
+      <span class="value">1</span>
+    </div>
+  `;
+  output.appendChild(card);
+
+  const codeValue = card.querySelector("#codeValue");
+  codeValue.innerHTML = "";
+  const charElements = [];
+  for (let i = 0; i < code.length; i++) {
+    const span = document.createElement("span");
+    span.className = "code-char";
+    span.textContent = randomChar();
+    codeValue.appendChild(span);
+    charElements.push(span);
+  }
+
+  card.querySelector("#copyBtn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      const btn = card.querySelector("#copyBtn");
+      btn.classList.add("copied");
+      btn.innerHTML = icons.check;
+      showToast("Промокод скопирован");
+      setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = icons.copy; }, 1500);
+    } catch (e) {
+      showToast("Не удалось скопировать", true);
+    }
+  });
+
+  await rollCodeAnimation(code.split(""), charElements);
+  card.classList.add("glow");
+
+  isRolling = false;
+  genIcon.classList.remove("spin");
+
+  let remaining = Math.ceil(COOLDOWN_MS / 1000);
+  genLabel.textContent = `Подождите ${remaining}...`;
+
+  clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(cooldownTimer);
+      genBtn.disabled = false;
+      genLabel.textContent = "Сгенерировать промокод";
+    } else {
+      genLabel.textContent = `Подождите ${remaining}...`;
+    }
+  }, 1000);
+}
+
+document.getElementById("genBtn").addEventListener("click", onGenerate);
+
+/* ── Пополнение ── */
+let topupTotal = 0;
+
+function resetTopup() {
+  topupTotal = 0;
+  document.getElementById("totalValue").textContent = "0 G";
+  document.getElementById("cartBtn").disabled = true;
+  document.querySelectorAll(".amount-btn").forEach(b => b.classList.remove("selected"));
+}
+
+document.querySelectorAll(".amount-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const amount = parseInt(btn.dataset.amount, 10);
+    topupTotal += amount;
+    document.getElementById("totalValue").textContent = `${topupTotal} G`;
+    document.getElementById("cartBtn").disabled = topupTotal <= 0;
+    btn.classList.add("selected");
+    setTimeout(() => btn.classList.remove("selected"), 250);
+  });
+});
+
+document.getElementById("cartBtn").addEventListener("click", () => {
+  const id = document.getElementById("idInput").value.trim();
+
+  if (!/^\d{8}$/.test(id)) {
+    const input = document.getElementById("idInput");
+    input.classList.add("error");
+    showToast("ID должен содержать 8 цифр", true);
+    setTimeout(() => input.classList.remove("error"), 800);
+    return;
+  }
+
+  document.getElementById("cartId").textContent = id;
+  document.getElementById("cartSum").textContent = `${topupTotal} G`;
+  document.getElementById("cartTotal").textContent = `${topupTotal} G`;
+
+  showView("viewCart");
+});
+
+document.getElementById("payBtn").addEventListener("click", () => {
+  const id = document.getElementById("idInput").value.trim();
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }) +
+                  " " + now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+  document.getElementById("successId").textContent = id;
+  document.getElementById("successSum").textContent = `${topupTotal} G`;
+  document.getElementById("successDate").textContent = dateStr;
+  document.getElementById("successText").textContent = `Средства зачислены на аккаунт ${id}`;
+
+  showView("viewSuccess");
+});
+
+document.getElementById("topupAgainBtn").addEventListener("click", () => {
+  showView("viewTopup");
+  resetTopup();
+});
+
+/* ── Вход ── */
+function tryLogin() {
+  const input = document.getElementById("keyInput");
+  const errorMsg = document.getElementById("errorMsg");
+  const gate = document.getElementById("gate");
+  const app = document.getElementById("app");
+
+  if (input.value === ACCESS_KEY) {
+    gate.style.display = "none";
+    app.classList.add("active");
+    errorMsg.classList.remove("show");
+  } else {
+    input.classList.add("error");
+    errorMsg.classList.add("show");
+    input.value = "";
+    setTimeout(() => input.classList.remove("error"), 600);
+  }
+}
+
+function togglePassword() {
+  const input = document.getElementById("keyInput");
+  const icon = document.getElementById("eyeIcon");
+  if (input.type === "password") { input.type = "text"; icon.innerHTML = eyeClosed; }
+  else { input.type = "password"; icon.innerHTML = eyeOpen; }
+}
+
+document.getElementById("toggleEye").addEventListener("click", togglePassword);
+document.getElementById("loginBtn").addEventListener("click", tryLogin);
+document.getElementById("keyInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") tryLogin();
+});
+</script>
+
+</body>
+    </html>
