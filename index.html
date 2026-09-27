@@ -300,8 +300,8 @@
   .row + .row { border-top: 1px solid rgba(255,255,255,0.04); }
 
   .row .row-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
     opacity: 0.7;
     display: flex;
@@ -315,13 +315,14 @@
     font-size: 12px;
     color: var(--text-dim);
     min-width: 78px;
+    flex-shrink: 0;
   }
 
   .row .value {
     font-size: 14px;
     font-weight: 600;
-    word-break: break-all;
     flex: 1;
+    word-break: break-word;
   }
 
   .code-row {
@@ -330,18 +331,22 @@
 
   .code-value {
     font-family: 'SF Mono', 'Consolas', monospace;
-    font-size: 15px;
-    letter-spacing: 1.5px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
     color: var(--accent-2);
     text-shadow: 0 0 16px rgba(77,212,255,0.4);
     display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
+    flex-wrap: nowrap;
+    gap: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
   }
 
   .code-char {
     display: inline-block;
-    min-width: 11px;
+    width: 1.05ch;
     text-align: center;
     transition: color 0.1s;
   }
@@ -391,6 +396,16 @@
   .copy-btn svg { width: 16px; height: 16px; }
 
   .rarity-value { color: var(--rarity-color, #fff); }
+
+  .weapon-icon {
+    color: var(--accent-2);
+    opacity: 0.9 !important;
+  }
+
+  .weapon-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
 
   .rules {
     background: var(--bg-card-2);
@@ -468,10 +483,10 @@
 
   .toast svg { width: 16px; height: 16px; }
 
-  /* ── Weapon silhouettes ── */
-  .weapon-icon svg {
-    width: 16px;
-    height: 16px;
+  @media (max-width: 420px) {
+    .code-value { font-size: 12.5px; letter-spacing: 0.3px; }
+    .row .label { min-width: 66px; font-size: 11.5px; }
+    .row .value { font-size: 13px; }
   }
 </style>
 </head>
@@ -637,19 +652,23 @@ const rarityColors = {
   Nameless:  "#ff3b3b"
 };
 
-// SVG-иконки
 const icons = {
   ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .9-5 4.8 1.2 7L12 18l-6.2 3.2L7 14.2 2 9.4l7-.9z"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-  // силуэты оружия
-  pistol: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h13l2 3v2h-3l-1 4h-3l-1-4H8v3H5v-3H3V8h1zm2 2v2h2v-2H6z"/></svg>',
-  rifle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 9h4l2-2h8l3 3v2h-4l-2 3h-3l-1-3H2V9zm2 2v1h3v-1H4zm7-1v1h4v-1h-4z"/></svg>',
-  sniper: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 10h6l1-2h4v2h3l2-3 2 1-2 3v2h-3l-1 2h-3l-1-2H2v-3zm3 1v1h3v-1H5zm9-1v1h3v-1h-3z"/></svg>',
-  smg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h12l2 2v2h-3l-1 3h-3l-1-3H6v2H3v-2H2V9h1zm2 2v1h3v-1H5zm7-1v1h3v-1h-3z"/></svg>',
-  shotgun: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 10h16l2 2v2h-4l-1 3h-3l-1-3H2v-4zm3 1v2h4v-2H5zm10-1v2h3v-2h-3z"/></svg>',
-  knife: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2l6 6-3 3-2-2-7 7-2-2 7-7-2-2 3-3zM6 16l2 2-3 3-2-2 3-3z"/></svg>'
+
+  pistol: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8v4h4l1 2h5l1-2h3l2 2h3v-3h-2l-1-2h-6l-1-1H3zm4 6h5v3H7v-3z"/></svg>',
+
+  rifle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 10h3V8h8v2h3l2 2h3v2h-2l-1 2h-3l-1-2H9v3H5v-3H2v-2zm16-1h2v3h-2z"/></svg>',
+
+  sniper: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 11h2v2H2v-2zm3-1h9v3H5v-3zm9 1h4v-2h3v4h-3v-2h-4v-3zM6 7h2v2H6V7zm5 10h4v2h-4v-2z"/></svg>',
+
+  smg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 10h9v3H8v2H3v-5zm9 0h4l2 2v1h-2l-1 3h-3v-3h-1v-3zm7-1h2v3h-2V9z"/></svg>',
+
+  shotgun: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 11h14v3H2v-3zm14-1h5v5h-3l-1-2h-1V10zM4 15h4v2H4v-2z"/></svg>',
+
+  knife: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3l7 7-3 3-2-2-6 6-2-2 6-6-2-2 2-4zm-7 14l2 2-3 3-2-2 3-3z"/></svg>'
 };
 
 const eyeOpen = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
@@ -657,25 +676,21 @@ const eyeClosed = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a
 
 function getWeaponIcon(skin) {
   const s = skin.toLowerCase();
-  if (s.includes("karambit") || s.includes("butterfly") || s.includes("bayonet") ||
-      s.includes("kunai") || s.includes("stiletto") || s.includes("tanto") ||
-      s.includes("kukri") || s.includes("fang") || s.includes("scorpion") ||
-      s.includes("daggers") || s.includes("sting") || s.includes("mantis")) {
+
+  if (/(karambit|butterfly|bayonet|kunai|stiletto|tanto|kukri|fang|scorpion|daggers|sting|mantis|knife)/.test(s)) {
     return icons.knife;
   }
-  if (s.includes("awm") || s.includes("m40") || s.includes("m110") || s.includes("sniper")) {
+  if (/(awm|m40|m110|sniper)/.test(s)) {
     return icons.sniper;
   }
-  if (s.includes("akr") || s.includes("m4") || s.includes("m16") || s.includes("fn fal") ||
-      s.includes("famas") || s.includes("val") || s.includes("g22") || s.includes("ak")) {
-    return icons.rifle;
-  }
-  if (s.includes("spas") || s.includes("shotgun")) {
+  if (/(spas|shotgun)/.test(s)) {
     return icons.shotgun;
   }
-  if (s.includes("mp5") || s.includes("mp7") || s.includes("p90") || s.includes("uzi") ||
-      s.includes("ump") || s.includes("mac")) {
+  if (/(mp5|mp7|p90|uzi|ump|mac)/.test(s)) {
     return icons.smg;
+  }
+  if (/(akr|m4|m16|fn fal|famas|val|g22|m60)/.test(s)) {
+    return icons.rifle;
   }
   return icons.pistol;
 }
@@ -754,12 +769,11 @@ function showToast(text, isError = false) {
 }
 
 async function rollCodeAnimation(codeChars, charElements) {
-  const REEL_DURATION = 1000;   // сколько крутится одна буква
-  const STAGGER = 80;           // задержка между остановками соседних букв
+  const REEL_DURATION = 1000;
+  const STAGGER = 80;
 
   const startTime = performance.now();
 
-  // Запускаем анимацию для каждого символа
   const animations = charElements.map((el, index) => {
     return new Promise(resolve => {
       el.classList.add("spinning");
@@ -774,7 +788,6 @@ async function rollCodeAnimation(codeChars, charElements) {
           resolve();
           return;
         }
-        // Чем ближе к остановке — тем реже меняем символ
         const remaining = stopAt - now;
         const interval = Math.max(30, remaining / 12);
         el.textContent = randomChar();
@@ -807,7 +820,6 @@ async function onGenerate() {
   const { skin, rarity } = pickSkin();
   const color = rarityColors[rarity] || "#fff";
 
-  // Создаём карточку сразу
   const card = document.createElement("div");
   card.className = "card";
   card.style.setProperty("--rarity-color", color);
@@ -838,7 +850,6 @@ async function onGenerate() {
 
   output.appendChild(card);
 
-  // Разбиваем код на символы
   const codeValue = card.querySelector("#codeValue");
   codeValue.innerHTML = "";
   const charElements = [];
@@ -850,7 +861,6 @@ async function onGenerate() {
     charElements.push(span);
   }
 
-  // Кнопка копирования
   card.querySelector("#copyBtn").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(code);
@@ -867,18 +877,13 @@ async function onGenerate() {
     }
   });
 
-  // Запускаем анимацию прокрутки
   await rollCodeAnimation(code.split(""), charElements);
 
-  // Свечение карточки под цвет редкости
   card.classList.add("glow");
 
-  // Конец генерации
   isRolling = false;
   genIcon.classList.remove("spin");
-  genLabel.textContent = "Сгенерировать промокод";
 
-  // Кулдаун 5 секунд
   let remaining = Math.ceil(COOLDOWN_MS / 1000);
   genLabel.textContent = `Подождите ${remaining}...`;
   genBtn.disabled = true;
