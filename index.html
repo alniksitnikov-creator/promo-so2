@@ -18,6 +18,7 @@
     --accent-2: #4dd4ff;
     --danger: #ff4d6d;
     --green: #2ecc71;
+    --gold: #ffd166;
   }
 
   html, body {
@@ -251,9 +252,7 @@
   .gen-btn svg { width: 18px; height: 18px; }
   .gen-btn svg.spin { animation: spin 1s linear infinite; }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .output {
     display: flex;
@@ -261,6 +260,7 @@
     gap: 12px;
   }
 
+  /* ── Card ── */
   .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -269,7 +269,6 @@
     animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
-    transition: box-shadow 0.4s, border-color 0.4s;
   }
 
   .card::before {
@@ -283,12 +282,6 @@
   @keyframes slideIn {
     from { opacity: 0; transform: translateY(-12px) scale(0.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  /* Мягкое свечение как у кнопки — 0 6px 24px */
-  .card.glow {
-    box-shadow: 0 6px 24px var(--rarity-color);
-    border-color: var(--rarity-color);
   }
 
   .row {
@@ -326,9 +319,7 @@
     word-break: break-word;
   }
 
-  .code-row {
-    align-items: center;
-  }
+  .code-row { align-items: center; }
 
   .code-value {
     font-family: 'SF Mono', 'Consolas', monospace;
@@ -367,7 +358,7 @@
     100% { transform: scale(1);   color: var(--accent-2); }
   }
 
-  .copy-btn {
+  .action-btn {
     flex-shrink: 0;
     width: 34px;
     height: 34px;
@@ -382,19 +373,19 @@
     transition: color 0.2s, background 0.2s, border-color 0.2s;
   }
 
-  .copy-btn:hover {
+  .action-btn:hover {
     color: var(--text);
     border-color: var(--accent);
     background: rgba(124,92,255,0.1);
   }
 
-  .copy-btn.copied {
+  .action-btn.copied {
     color: var(--green);
     border-color: var(--green);
     background: rgba(46,204,113,0.1);
   }
 
-  .copy-btn svg { width: 16px; height: 16px; }
+  .action-btn svg { width: 16px; height: 16px; }
 
   .rarity-value { color: var(--rarity-color, #fff); }
 
@@ -408,6 +399,75 @@
     height: 20px !important;
   }
 
+  /* ── Verify ── */
+  .verify-row {
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .verify-btn {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-card-2);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+  }
+
+  .verify-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(124,92,255,0.08);
+  }
+
+  .verify-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+  .verify-btn svg { width: 14px; height: 14px; }
+  .verify-btn svg.spin { animation: spin 0.8s linear infinite; }
+
+  .verify-result {
+    font-size: 12.5px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+  }
+
+  .verify-result.show { display: flex; }
+  .verify-result svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .verify-result.valid {
+    background: rgba(46,204,113,0.1);
+    border: 1px solid rgba(46,204,113,0.3);
+    color: var(--green);
+  }
+
+  .verify-result.used {
+    background: rgba(255,209,102,0.08);
+    border: 1px solid rgba(255,209,102,0.3);
+    color: var(--gold);
+  }
+
+  .verify-result.invalid {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: var(--danger);
+  }
+
+  /* ── Rules ── */
   .rules {
     background: var(--bg-card-2);
     border: 1px solid var(--border);
@@ -452,6 +512,14 @@
     font-size: 11px;
     color: #55556a;
     padding: 4px 0 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .footer .counter {
+    color: var(--text-dim);
+    font-size: 11.5px;
   }
 
   /* ── Toast ── */
@@ -475,6 +543,7 @@
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
     pointer-events: none;
     z-index: 100;
+    max-width: 90vw;
   }
 
   .toast.show {
@@ -482,7 +551,7 @@
     opacity: 1;
   }
 
-  .toast svg { width: 16px; height: 16px; }
+  .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   @media (max-width: 420px) {
     .code-value { font-size: 12.5px; letter-spacing: 0.3px; }
@@ -555,13 +624,16 @@
       </ul>
     </div>
 
-    <div class="footer">© Standoff 2 Promo Generator</div>
+    <div class="footer">
+      <span class="counter" id="counter">Сгенерировано: 0</span>
+      <span>© Standoff 2 Promo Generator</span>
+    </div>
   </div>
 
 </div>
 
 <div class="toast" id="toast">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <svg id="toastIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M20 6L9 17l-5-5"/>
   </svg>
   <span id="toastText">Скопировано</span>
@@ -639,6 +711,7 @@ const skins = {
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const usedCodes = new Set();
+const verifiedCodes = new Map(); // код -> { verifiedAt, expiresAt, used }
 let totalGenerated = 0;
 let isRolling = false;
 let cooldownTimer = null;
@@ -658,6 +731,10 @@ const icons = {
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .9-5 4.8 1.2 7L12 18l-6.2 3.2L7 14.2 2 9.4l7-.9z"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
+  xmark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
 
   pistol: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8v4h4l1 2h5l1-2h3l2 2h3v-3h-2l-1-2h-6l-1-1H3zm4 6h5v3H7v-3z"/></svg>',
   rifle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 10h3V8h8v2h3l2 2h3v2h-2l-1 2h-3l-1-2H9v3H5v-3H2v-2zm16-1h2v3h-2z"/></svg>',
@@ -753,10 +830,18 @@ function pickSkin() {
   return { skin: randomChoice(skins.Common), rarity: "Common" };
 }
 
+function updateCounter() {
+  document.getElementById("counter").textContent = `Сгенерировано: ${totalGenerated}`;
+}
+
 function showToast(text, isError = false) {
   const toast = document.getElementById("toast");
   const toastText = document.getElementById("toastText");
+  const toastIcon = document.getElementById("toastIcon");
   toastText.textContent = text;
+  toastIcon.innerHTML = isError
+    ? '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>'
+    : '<path d="M20 6L9 17l-5-5"/>';
   toast.style.borderColor = isError ? "var(--danger)" : "var(--green)";
   toast.style.color = isError ? "var(--danger)" : "var(--green)";
   toast.classList.add("show");
@@ -797,6 +882,42 @@ async function rollCodeAnimation(codeChars, charElements) {
   await Promise.all(animations);
 }
 
+function formatDate(date) {
+  const d = date.getDate().toString().padStart(2, "0");
+  const m = (date.getMonth() + 1).toString().padStart(2, "0");
+  const y = date.getFullYear();
+  return `${d}.${m}.${y}`;
+}
+
+async function verifyCode(code, resultEl) {
+  // Имитация запроса на сервер
+  await new Promise(r => setTimeout(r, 1100 + Math.random() * 700));
+
+  resultEl.className = "verify-result";
+
+  // Если код уже проверяли — считаем, что он "уже активирован"
+  if (verifiedCodes.has(code)) {
+    const data = verifiedCodes.get(code);
+    resultEl.classList.add("show", "used");
+    resultEl.innerHTML = icons.clock + `<span>Код уже был активирован ${formatDate(data.verifiedAt)}</span>`;
+    return;
+  }
+
+  // Случайный результат: 80% valid, 20% invalid
+  const roll = Math.random();
+
+  if (roll < 0.8) {
+    const now = new Date();
+    const expires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    verifiedCodes.set(code, { verifiedAt: now, expiresAt: expires });
+    resultEl.classList.add("show", "valid");
+    resultEl.innerHTML = icons.check + `<span>Код действителен до ${formatDate(expires)}</span>`;
+  } else {
+    resultEl.classList.add("show", "invalid");
+    resultEl.innerHTML = icons.xmark + `<span>Код не найден в базе Axelbolt</span>`;
+  }
+}
+
 async function onGenerate() {
   if (isRolling) return;
 
@@ -815,6 +936,7 @@ async function onGenerate() {
   const code = generateCode(12);
   const { skin, rarity } = pickSkin();
   const color = rarityColors[rarity] || "#fff";
+  updateCounter();
 
   const card = document.createElement("div");
   card.className = "card";
@@ -825,7 +947,7 @@ async function onGenerate() {
       <span class="row-icon" style="color:${color}">${icons.ticket}</span>
       <span class="label">Промокод</span>
       <span class="value code-value" id="codeValue"></span>
-      <button class="copy-btn" id="copyBtn" title="Скопировать">${icons.copy}</button>
+      <button class="action-btn" id="copyBtn" title="Скопировать">${icons.copy}</button>
     </div>
     <div class="row">
       <span class="row-icon weapon-icon">${getWeaponIcon(skin)}</span>
@@ -842,6 +964,13 @@ async function onGenerate() {
       <span class="label">Активаций</span>
       <span class="value">1</span>
     </div>
+    <div class="verify-row">
+      <button class="verify-btn" id="verifyBtn">
+        <span class="verify-icon">${icons.search}</span>
+        <span>Проверить промокод</span>
+      </button>
+      <div class="verify-result" id="verifyResult"></div>
+    </div>
   `;
 
   output.appendChild(card);
@@ -857,6 +986,7 @@ async function onGenerate() {
     charElements.push(span);
   }
 
+  // Копирование
   card.querySelector("#copyBtn").addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(code);
@@ -873,16 +1003,35 @@ async function onGenerate() {
     }
   });
 
-  await rollCodeAnimation(code.split(""), charElements);
+  // Проверка промокода
+  const verifyBtn = card.querySelector("#verifyBtn");
+  const verifyResult = card.querySelector("#verifyResult");
+  const verifyIcon = verifyBtn.querySelector(".verify-icon");
 
-  card.classList.add("glow");
+  verifyBtn.addEventListener("click", async () => {
+    if (verifyBtn.disabled) return;
+    verifyBtn.disabled = true;
+    verifyIcon.classList.add("spin");
+    verifyIcon.innerHTML = icons.search;
+    verifyBtn.querySelector("span:last-child").textContent = "Проверка...";
+    verifyResult.classList.remove("show");
+
+    await verifyCode(code, verifyResult);
+
+    verifyIcon.classList.remove("spin");
+    verifyBtn.querySelector("span:last-child").textContent = "Проверить промокод";
+    verifyBtn.disabled = false;
+  });
+
+  // Анимация прокрутки
+  await rollCodeAnimation(code.split(""), charElements);
 
   isRolling = false;
   genIcon.classList.remove("spin");
 
+  // Кулдаун 5 секунд
   let remaining = Math.ceil(COOLDOWN_MS / 1000);
   genLabel.textContent = `Подождите ${remaining}...`;
-  genBtn.disabled = true;
 
   clearInterval(cooldownTimer);
   cooldownTimer = setInterval(() => {
@@ -936,4 +1085,4 @@ document.getElementById("genBtn").addEventListener("click", onGenerate);
 </script>
 
 </body>
-</html>
+       </html>
