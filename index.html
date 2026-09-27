@@ -16,7 +16,6 @@
     --text-dim: #8a8aa0;
     --accent: #7c5cff;
     --accent-2: #4dd4ff;
-    --green: #2ecc71;
   }
 
   body {
@@ -110,6 +109,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-height: 0;
   }
 
   .card {
@@ -410,6 +410,11 @@ function pickSkin() {
 }
 
 function onGenerate() {
+  const output = document.getElementById("output");
+
+  // Удаляем прошлый промокод — на экране всегда только один
+  output.innerHTML = "";
+
   const code = generateCode(12);
   const { skin, rarity } = pickSkin();
   const color = rarityColors[rarity] || "#fff";
@@ -441,16 +446,11 @@ function onGenerate() {
     </div>
   `;
 
-  const output = document.getElementById("output");
-  output.prepend(card);
-
-  while (output.children.length > 30) {
-    output.removeChild(output.lastChild);
-  }
+  output.appendChild(card);
 }
 
 document.getElementById("genBtn").addEventListener("click", onGenerate);
 </script>
 
 </body>
- </html>
+</html>
